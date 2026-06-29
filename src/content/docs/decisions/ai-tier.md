@@ -1,11 +1,13 @@
-# Decision deep-dives — AI / agentic tier
+---
+title: "Decision deep-dives — AI / agentic tier"
+---
 
 Each entry is a real decision from the project, in the format it was actually reasoned through:
 the problem, the options weighed *with their pros and cons*, the choice, and the tradeoff accepted.
 These are distilled from the project's ADRs (numbers referenced) and rewritten to be public-safe.
 
-See also the design write-ups in [`../agentic-ai/`](../agentic-ai/) for *how* these were built; this
-page is the *why this and not that*.
+See also the design write-ups under [Applied AI](/ai/agentic-foundation/) for *how* these were built;
+this page is the *why this and not that*.
 
 ---
 
@@ -54,7 +56,7 @@ polyglot cost is paid once and bought real control + anti-lock-in; the model bec
 adapter with zero code change to swap.
 
 **Tradeoff accepted.** Two CI/CD paths and a language boundary, in exchange for owning the agent loop
-and never being locked to one vendor or framework. ([overview](../agentic-ai/overview.md))
+and never being locked to one vendor or framework. ([overview](/ai/agentic-foundation/))
 
 ---
 
@@ -74,7 +76,7 @@ and never being locked to one vendor or framework. ([overview](../agentic-ai/ove
 of every agent. An agent is never trusted to "be careful"; the controls sit *around* the model.
 
 **Tradeoff accepted.** Slower to the first demo, paid back as every subsequent agent being safe by
-construction. ([security](../agentic-ai/security.md))
+construction. ([security](/ai/agent-security/))
 
 ---
 
@@ -97,7 +99,7 @@ the `agent-security` output validators (e.g. reject ungrounded numbers) as one c
 
 **Tradeoff accepted.** Some answerable questions get a cautious abstention; in exchange the system
 never emits a sourced-looking lie. This caught a real fabricated-citation failure from a 7B model.
-([rag](../agentic-ai/rag.md), [code](../../code/citation_validator.py))
+([rag](/ai/rag-layer/), [code](/code/))
 
 ---
 
@@ -122,7 +124,7 @@ tool ports, so a direct-HTTP adapter and an MCP adapter coexist per tool.
 
 **Tradeoff accepted.** No discoverable, open-ended tool ecosystem; in exchange, bounded auditable
 agent↔tool plumbing with no confused deputy. A tool-poisoning red-team harness asserts a mutated tool
-description can't change behavior. ([mcp](../agentic-ai/mcp.md), [code](../../code/mcp_client.py))
+description can't change behavior. ([mcp](/ai/mcp-tools/), [code](/code/))
 
 ---
 

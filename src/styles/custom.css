@@ -1,0 +1,49 @@
+/* Brand alignment — match the DPS marketing site's green (emerald) accent so
+ * the docs feel of-a-piece with infopole.org. Starlight's base :root is the
+ * DARK theme; :root[data-theme='light'] overrides for light (now the default).
+ * Each theme needs its own low/accent/high ramp (light tint / mid / strong).
+ */
+:root {
+  --sl-font: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Dark theme */
+  --sl-color-accent-low: #053a2c;
+  --sl-color-accent: #10b981; /* emerald-500 — bright on dark */
+  --sl-color-accent-high: #a7f3d0; /* emerald-200 */
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #d1fae5; /* emerald-100 — subtle tint */
+  --sl-color-accent: #059669; /* emerald-600 — matches marketing primary, readable on white */
+  --sl-color-accent-high: #065f46; /* emerald-800 — strong accent text */
+}
+
+/* Inline SVG diagrams (hand-authored, themed via the CSS vars above so they
+ * adapt to light/dark with no client JS). */
+.diagram {
+  margin: 1.9rem 0;
+  text-align: center;
+}
+.diagram svg {
+  display: block;
+  margin: 0 auto;
+}
+/* SVG <text> has no font-family of its own — inherit Inter once, here. */
+.diagram svg text {
+  font-family: var(--sl-font);
+}
+.diagram figcaption {
+  margin: 0.7rem auto 0;
+  max-width: 46rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--sl-color-gray-3);
+}
+/* Detailed diagrams shouldn't crush on narrow screens — let them scroll. */
+@media (max-width: 640px) {
+  .diagram {
+    overflow-x: auto;
+  }
+  .diagram svg {
+    min-width: 560px;
+  }
+}

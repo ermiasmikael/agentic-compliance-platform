@@ -2,3 +2,8 @@
 node_modules/
 .venv/
 __pycache__/
+dist/
+.astro/
+*.log
+.env
+.env.production

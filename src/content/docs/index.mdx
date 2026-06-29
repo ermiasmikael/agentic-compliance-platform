@@ -1,0 +1,54 @@
+---
+title: Infopole Engineering
+description: How the DPS denied-party-screening platform is built — architecture, applied AI, and AI agent security.
+# Home page only: the page title equals the site title, so Starlight's default
+# "{title} | {siteTitle}" doubles it. Override the raw <title> to a single brand.
+head:
+  - tag: title
+    content: Infopole Engineering
+template: splash
+hero:
+  tagline: A deep look at how a multi-tenant, event-driven trade-compliance platform — and its security-first AI layer — is built.
+  actions:
+    - text: Architecture overview
+      link: /agentic-compliance-platform/architecture/platform-overview/
+      icon: right-arrow
+      variant: primary
+    - text: Applied AI deep-dive
+      link: /agentic-compliance-platform/ai/agentic-foundation/
+      icon: open-book
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+These docs are the engineering companion to the [Infopole](https://infopole.org)
+**Denied Party Screening (DPS)** platform — written for developers and technical
+reviewers. They favour *why* over *what*: the decisions, trade-offs, and
+failure-modes behind a real, multi-tenant compliance system and its AI layer.
+
+<CardGrid>
+  <Card title="Architecture" icon="puzzle">
+    ~30 hexagonal Spring Boot services, event-first over a Kafka-compatible bus,
+    schema-first contracts, and architecture rules enforced in CI.
+    [Read →](/agentic-compliance-platform/architecture/platform-overview/)
+  </Card>
+  <Card title="Applied AI" icon="rocket">
+    A model-agnostic, on-prem agent tier — built so agents are *tools analysts
+    use*, never decisions the system makes.
+    [Read →](/agentic-compliance-platform/ai/agentic-foundation/)
+  </Card>
+  <Card title="AI agent security" icon="approve-check">
+    A six-pillar security baseline aligned to the OWASP LLM Top 10 — gating the
+    rest of the AI roadmap.
+    [Read →](/agentic-compliance-platform/ai/agent-security/)
+  </Card>
+  <Card title="Machine learning" icon="bars">
+    An ML matcher shipped *shadow → canary → live* behind a KPI guard with
+    automatic rollback — and a loop that trains it on analyst decisions.
+    [Read →](/agentic-compliance-platform/ml/adaptive-matching/)
+  </Card>
+  <Card title="Honest by design" icon="information">
+    No manufactured metrics. This is a real self-hosted platform; these pages
+    describe what exists and the reasoning behind it.
+  </Card>
+</CardGrid>

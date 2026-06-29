@@ -1,4 +1,6 @@
-# Decision deep-dives — platform & infrastructure
+---
+title: "Decision deep-dives — platform & infrastructure"
+---
 
 Real decisions from the project, in problem → options-with-pros/cons → choice → tradeoff form.
 Distilled from the ADRs (numbers referenced) and rewritten to be public-safe (no infra
@@ -164,7 +166,7 @@ operation + hop depth), load-tested it (found worst-case 3-hop p95 at the budget
 **Tradeoff accepted.** Recursive CTEs aren't a graph engine, but the measured loop showed they don't
 need to be yet. The judgment on display: *instrument → measure → cheapest effective fix → re-measure →
 defer the big rewrite until the data demands it.*
-([architecture](../architecture.md#engineering-judgment-measured-not-asserted))
+([architecture](/architecture/platform-overview/))
 
 ---
 
@@ -198,7 +200,7 @@ low given JWT-at-every-service.
 
 ## Honourable mentions (catalogued, not expanded here)
 
-These were real options-weighed decisions too; see [`README.md`](README.md) for the full catalog:
+These were real options-weighed decisions too; see [the catalog](/decisions/) for the full set:
 
 - **Dedicated inference VM + workload-class split** (ADR-0017) — isolate LLM/ML compute from the
   stateless business services; accepted in principle, *deferred* until hardware, with a simulated-LLM
