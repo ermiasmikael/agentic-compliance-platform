@@ -1,68 +1,79 @@
-# Decision records (curated)
+# Decision records
 
-The platform is backed by ~40 Architecture Decision Records. Decision-making — *what was
-considered, what was chosen, and why* — is the signal worth showing, so here's a curated, distilled
-selection (full ADRs aren't all public; some carry lab-specific detail). Each entry: the decision,
-the alternatives weighed, and the reasoning.
+The platform is backed by ~40 Architecture Decision Records. The decision-making — *what was
+considered, what was chosen, and why* — is the signal worth showing, so this section is built to
+demonstrate the rigor, not just the conclusions.
 
-> The format itself is the habit: every non-trivial choice gets a written record with the rejected
-> options and the tradeoff, so the *why* survives the decision.
+> **The habit:** every non-trivial choice got a written record with the rejected options, their
+> pros/cons, and the tradeoff accepted — so the *why* survives the decision. That discipline is the
+> point as much as any individual call.
 
-## Agentic AI tier
+## How to read this
 
-**Python tier, not in-JVM (ADR-0035).** Considered keeping agents inside the Spring services.
-Chose a separate Python/`uv` tier: Python is the AI mainstream, and model-agnosticism is cleaner
-there. Cost: a polyglot boundary. Benefit: the AI stack evolves independently of the platform.
+- **[`ai-tier.md`](ai-tier.md)** — deep-dives on the AI / agentic decisions, each as
+  *problem → options-with-pros/cons → choice → tradeoff*.
+- **[`platform.md`](platform.md)** — the same treatment for the platform & infrastructure decisions.
+- The **catalog below** lists the full decision set, names the alternatives each one weighed, and links
+  to the deep-dive where one exists. (Full original ADRs aren't all public — some carry lab-specific
+  detail; these are distilled and sanitized.)
 
-**Model-agnostic `LlmPort` + hand-rolled loops — no LangChain (ADR-0035).** Considered LangChain /
-a framework. Chose a thin `Llm` Protocol with per-provider adapters (LiteLLM under it) and
-hand-written agent loops. Reasoning: control, debuggability, owning the IP, and no framework churn;
-the model/runner becomes a swappable adapter (→ on-prem Ollama in the lab).
+---
 
-**Security baseline *before* features (ADR-0037).** Considered building agent features first and
-hardening later. Chose to build the OWASP-LLM-Top-10 enforcement layer (`agent-security`) first and
-make every agent depend on it. Reasoning: in a regulated product, retrofitting security onto shipped
-agent capability is how you ship vulnerabilities.
+## Catalog
 
-**Cite-or-abstain RAG (ADR-0038).** Considered standard "retrieve + generate." Chose to *reject* any
-answer that cites an unretrieved source or makes uncited claims, forcing an abstention. Reasoning:
-a confident wrong answer with a fake citation is worse than "I don't know" in compliance — and it
-caught a real 7B-model fabrication.
+### AI / agentic tier
 
-**MCP closed allow-list + token propagation (ADR-0039).** Considered MCP's dynamic server discovery
-+ a service-account token. Rejected both: dynamic discovery is the tool-poisoning / over-scope risk,
-and a service account is the confused-deputy problem. Chose a fixed first-party allow-list with the
-caller's bearer propagated and every call traced.
+| # | Decision | Alternatives weighed | Deep-dive |
+|---|---|---|---|
+| 0035 | Python agent tier, model-agnostic port, **no LangChain** | in-JVM (Spring AI) · a Python framework · hand-rolled behind a port | [ai-tier](ai-tier.md#python-agent-tier-model-agnostic-no-langchain-adr-0035) |
+| 0015 | RAG + tool-use **over fine-tuning** a model | train/fine-tune a specialized LLM · RAG + tools | [ai-tier](ai-tier.md#rag--tool-use-over-fine-tuning-a-model-adr-0015) |
+| 0037 | Agent **security baseline before features** | features-first-harden-later · baseline-first | [ai-tier](ai-tier.md#security-baseline-before-agent-features-adr-0037) |
+| 0038 | **Cite-or-abstain** as a hard output contract | trust-the-model grounding · reject-if-ungrounded | [ai-tier](ai-tier.md#cite-or-abstain-as-a-hard-output-contract-adr-0038) |
+| 0039 | MCP: **closed allow-list + token propagation** | dynamic discovery vs allow-list · service account vs user bearer | [ai-tier](ai-tier.md#mcp-closed-allow-list--token-propagation-adr-0039) |
+| 0018 | **Write-capable** agent tools + provable non-autonomy | flag on existing event vs distinct write event; layered authz | [ai-tier](ai-tier.md#write-capable-agent-tools--provable-non-autonomy-adr-0018) |
+| 0036 | Export-drafter as the **thin first agent** | a richer first agent vs a minimal prose-only, single-tool, HITL one | — |
+| 0009/0011/0012 | ML rollout: **shadow → canary → live**, gated + reversible | binary on/off vs graduated modes; deterministic vs random canary | [ai-tier](ai-tier.md#ml-rollout-shadow--canary--live-gated-and-reversible-adr-0009--0011--0012) |
+| 0010 | **CPU-first** inference + lightweight registry MVP | GPU inference vs CPU-first; feature-rich vs lightweight | — |
 
-**Agents are tools, not decision-makers (cross-cutting).** The governing constraint: deterministic,
-rule-traceable screening/case outcomes; agents only retrieve/draft/propose; a durable trace proves
-non-autonomy. Reasoning: "the AI decided" is legally unsaleable to a compliance buyer.
+### Platform & infrastructure
 
-## Platform
+| # | Decision | Alternatives weighed | Deep-dive |
+|---|---|---|---|
+| 0019 | Multi-tenancy via **Keycloak Organizations** | shared realm · realm-per-tenant · KC Orgs · custom scoped UI | [platform](platform.md#multi-tenancy-keycloak-organizations-not-realm-per-tenant-adr-0019) |
+| 0021 | Tenant routing: **single hostname**, org from token | per-tenant subdomain · per-tenant path · single hostname | [platform](platform.md#tenant-routing-single-hostname-org-from-the-token-adr-0021) |
+| 0025 | **Local-as-cloud-mirror**: decide now, don't defer | build-now-refactor-later · AWS-only · abstraction layer · mirror | [platform](platform.md#local-as-cloud-mirror-decide-now-dont-defer-to-migration-adr-0025) |
+| 0026 | **No service consolidation** pre-migration | consolidate to ~14 · partial · scale-to-zero · decide-later | [platform](platform.md#no-service-consolidation-pre-migration-adr-0026) |
+| 0013 | Watchlist **ingest split** + source-provider plugin SPI | monolith vs split; trigram vs Elasticsearch vs OpenSearch BMPM | [platform](platform.md#watchlist-ingest-split-the-service--a-source-provider-plugin-pattern-adr-0013) |
+| 0032 | Relationship graph: **Postgres CTEs**, graph DB deferred *on evidence* | graph DB now vs CTEs + measure | [platform](platform.md#relationship-graph-postgres-recursive-ctes-graph-db-deferred-on-evidence-adr-0032) |
+| 0016 | Edge hardening: **skip oauth2-proxy**, per-vhost certs/cookies | deploy proxy vs skip; wildcard vs per-vhost; cookie scope | [platform](platform.md#edge-hardening-skip-oauth2-proxy-per-vhost-certs-and-cookies-adr-0016) |
+| 0014 | Platform-admin **app + second realm split** | one codebase/realm vs two apps + two realms | [platform](platform.md#honourable-mentions-catalogued-not-expanded-here) |
+| 0017 | Dedicated **inference VM** + workload-class split (deferred) | all-on-one-host vs dedicated ML host | [platform](platform.md#honourable-mentions-catalogued-not-expanded-here) |
+| 0028 | Tenant/member lifecycle: **tombstone, never hard-delete** | hard-delete · 30/60/90-day grace · disable-flag-only | [platform](platform.md#honourable-mentions-catalogued-not-expanded-here) |
+| 0029 | Source **provenance + tier model** (unified table) | separate tables per tier vs one table + provenance array | [platform](platform.md#honourable-mentions-catalogued-not-expanded-here) |
+| 0024 | AWS target architecture (substrate map) | lift-and-shift EC2 · full serverless · stay-on-lab · managed-services map | — |
+| 0027 | Public exposure: **DNS-only + TLS at the reverse proxy** | CDN-proxy modes · TLS at firewall · double-hop TLS | — |
+| 0020 | Dynamic issuer trust **deferred** with an activation trigger | build-now · identity-brokering · static-list-now | — |
+| 0022 | Tenant signup: **self-service + operator-driven**, both | operator-only · self-service-only · magic-link · temp-password | — |
+| 0023 | Tenant team-management: **custom UI for the 95%** | embed KC console · custom-everything · direct-to-KC-API | — |
+| 0031 | **Three-plane** architecture (data / operations / tenant) | flat tree · consolidation · planes-as-labels | — |
+| 0033 | **Two-track** product strategy (operations + intelligence data) | single-track focus · parallel two-track | — |
 
-**Three-plane service layout (ADR-0031).** Considered a flat service tree and, separately, service
-*consolidation* to cut cost. Chose data/operations/tenant planes without consolidating. Reasoning:
-plane boundaries make the eventual cloud carve-up clean while keeping one-context-per-service.
+> The "no deep-dive" rows are real options-weighed ADRs too; they're catalogued here for breadth and
+> distilled in the deep-dive files where they're most instructive (several appear under *honourable
+> mentions* in [platform.md](platform.md#honourable-mentions-catalogued-not-expanded-here)).
 
-**Keycloak Organizations for multi-tenancy (ADR-0019).** Considered realm-per-tenant. Chose KC
-Organizations (one realm, org per tenant). Reasoning: realm-per-tenant doesn't scale operationally
-(issuer trust, import, upgrades per realm); KC Orgs gives tenant isolation without the per-realm tax.
+---
 
-**Local-as-cloud-mirror; solve locally before migrating (ADR-0024/0025).** Considered building
-straight for AWS. Chose to make the Proxmox lab mirror the AWS target shape so migration is a
-substrate swap, not a redesign. Reasoning: solve the architecture where iteration is cheap.
+## A few patterns worth naming
 
-**Transactional outbox over dual-write (platform-wide).** Considered emitting events directly from
-services. Chose the outbox pattern (event row + domain change in one transaction; async relay).
-Reasoning: a broker outage must never leave the DB and the event stream inconsistent.
+Reading across the set, the same judgment shows up repeatedly:
 
-**Postgres recursive-CTE graph, graph DB deferred (ADR-0032).** Considered a graph database
-(Apache AGE / Neo4j) for the relationship graph. Chose Postgres recursive CTEs, with the graph-DB
-decision gated on *measured* need. When a perf concern surfaced, it was load-tested and fixed with
-indexes + a fan-out cap (p95 1.99s → 1.40s) — deferring the migration on evidence, not guesswork.
-See [../architecture.md](../architecture.md#engineering-judgment-measured-not-asserted).
-
-**Explainable, replayable compliance (ADR-0034).** Risk scores expose per-factor contributions;
-policy changes can be simulated on historical traffic; watchlist versions are pinned for
-time-travel replay. Reasoning: a regulator asks "why this decision, on that date" — the platform
-must answer.
+- **Defer the expensive option behind an explicit trigger, not a vibe.** Graph DB (0032), dynamic
+  issuer trust (0020), Tier-A direct ingest (0029/0030), the dedicated ML VM (0017), service
+  consolidation (0026) — each was *decided* to wait, with the condition that would change the answer
+  written down.
+- **Decide on evidence where you can measure.** The graph-perf call (0032) was load-tested, not argued.
+- **In a compliance product, auditability beats convenience.** Tombstoning over hard-delete (0028),
+  provable agent non-autonomy (0018), cite-or-abstain (0038), provenance arrays (0029).
+- **Don't pay for hypothetical futures — but don't foreclose them either.** Single-hostname routing
+  (0021) keeps the carve-out option; no-consolidation (0026) keeps the consolidate-later option.

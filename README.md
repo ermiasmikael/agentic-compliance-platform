@@ -99,8 +99,11 @@ traced to an immutable audit log on the caller's own identity.
   mutated tool description can't change behavior. ([code](code/mcp_client.py))
 - **Hexagonal + DDD + event-driven at scale** — pure domain layers, ports/adapters, a transactional
   outbox, ArchUnit-enforced boundaries; ~28 services across data/operations/tenant planes.
-- **Decision records** — ~40 ADRs. Real tradeoff reasoning (KC-Orgs vs realm-per-tenant; Postgres
-  recursive-CTE graph vs a graph DB; Python agent tier vs in-JVM) — [`docs/decisions/`](docs/decisions/).
+- **Decision records** — ~40 ADRs, distilled into deep-dives that show the *rigor*: each as
+  problem → options-weighed-with-pros/cons → choice → tradeoff (KC-Orgs vs realm-per-tenant; Postgres
+  recursive-CTE graph vs a graph DB; RAG vs fine-tuning; closed-allow-list MCP; cite-or-abstain) —
+  [`docs/decisions/`](docs/decisions/) ([AI tier](docs/decisions/ai-tier.md) ·
+  [platform](docs/decisions/platform.md)).
 - **Engineering judgment, measured** — e.g. a graph-perf concern was *load-tested* (k6), the p95
   ceiling found, then fixed with a **cheaper composite-index + fan-out-cap mitigation** and
   **re-measured** (1.99s → 1.40s p95) — before reaching for a graph-database migration.
