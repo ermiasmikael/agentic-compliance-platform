@@ -54,7 +54,7 @@ sequenceDiagram
   participant SEC as agent-security
   participant RAG as agent-rag
   participant OS as OpenSearch (tenant-isolated)
-  participant LLM as Llm port -> Ollama
+  participant LLM as Llm port → Ollama
   participant TR as Durable trace
 
   A->>BFF: ask(question)  [bearer]
@@ -66,7 +66,7 @@ sequenceDiagram
   COP->>LLM: complete(data-marked grounding prompt)
   LLM-->>COP: draft answer
   COP->>SEC: validate_all (cite-or-abstain, ungrounded-number, ...)
-  SEC-->>COP: findings (reject -> abstain) 
+  SEC-->>COP: findings (reject → abstain)
   COP-->>BFF: grounded answer or abstention
   COP->>TR: AgentTrace (3 sinks; proves what ran)
 ```

@@ -23,7 +23,7 @@ flowchart LR
   T --> H[hybrid kNN + BM25 on OpenSearch]
   H --> C[chunks + source ids]
   C --> G[data-marked grounding prompt]
-  G --> M[(LLM via Llm port -> Ollama)]
+  G --> M[(LLM via Llm port → Ollama)]
   M --> V[cite-or-abstain validator]
   V -->|clean| ANS[grounded answer w/ citations]
   V -->|fabricated / uncited| AB[abstain]

@@ -17,7 +17,7 @@ flowchart TB
   OUT -->|findings| ABSTAIN[reject / abstain]
   OUT -->|clean| HITL[HITL gate: Effect / Approval / enforce]
   HITL --> ACT[effect e.g. propose case action]
-  ID -.-> TRACE[(durable trace: MinIO + PG + Kafka->audit)]
+  ID -.-> TRACE[(durable trace: MinIO + PG + Kafka→audit)]
   AUTHZ -.-> TRACE
   OUT -.-> TRACE
   HITL -.-> TRACE
