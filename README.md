@@ -3,8 +3,7 @@
 A curated, sanitized engineering case study of **PROVA**, a denied-party-screening
 (sanctions / PEP / adverse-media) compliance platform I designed and built solo — told
 AI-tier-forward, with a focus on building LLM-powered analyst tools that are *safe, grounded, and
-auditable* enough for a regulated product. Check PROVA in action at: **[Infopole](https://infopole.org)**
-is the company.
+auditable* enough for a regulated product. Check PROVA in action at: **[Infopole](https://infopole.org)**.
 
 **Honest framing:** this is a deep, from-scratch engineering exercise — a production-*grade* platform
 running on a private lab, not a shipped SaaS with paying customers. There are **no fabricated users or
