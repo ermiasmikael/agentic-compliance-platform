@@ -340,7 +340,7 @@ footer.colophon{border-top:1px solid var(--line); padding:44px 0 70px;}
         <li><a href="#exhibit-c"><span class="tag">C</span><span class="t">The Hexagonal Service Pattern</span></a></li>
         <li><a href="#exhibit-d"><span class="tag">D</span><span class="t">Microservices &amp; Event Backbone</span></a></li>
         <li><a href="#exhibit-e"><span class="tag">E</span><span class="t">Request Lifecycle — a Screening Call</span></a></li>
-        <li><a href="#exhibit-f"><span class="tag">F</span><span class="t">Human-in-the-Loop Agent Safety</span></a></li>
+        <li><a href="#exhibit-f"><span class="tag">F</span><span class="t">Agent Tool Calling &amp; Human-in-the-Loop Safety</span></a></li>
         <li><a href="#exhibit-g"><span class="tag">G</span><span class="t">Package Layout, Realized</span></a></li>
         <li><a href="#exhibit-h"><span class="tag">H</span><span class="t">Performance &amp; Concurrency, Measured</span></a></li>
         <li><a href="#exhibit-i"><span class="tag">I</span><span class="t">Service Dependency Graph</span></a></li>
@@ -907,8 +907,8 @@ footer.colophon{border-top:1px solid var(--line); padding:44px 0 70px;}
       <div class="exhibit-head">
         <span class="exhibit-tag">F</span>
         <div>
-          <h2>Human-in-the-Loop Agent Safety</h2>
-          <p class="claim">The AI copilot can propose a case assignment. It cannot make one — a different human always has to say yes.</p>
+          <h2>Agent Tool Calling &amp; Human-in-the-Loop Safety</h2>
+          <p class="claim">Agents call platform tools over MCP, ground every answer, and can propose a case assignment — but cannot make one. A different human always has to say yes, and every guarantee is enforced in code, not in the prompt.</p>
         </div>
       </div>
 
@@ -984,7 +984,7 @@ footer.colophon{border-top:1px solid var(--line); padding:44px 0 70px;}
             </svg>
           </div>
           <figcaption>
-            <b>Exhibit F.</b> There is no path from the copilot to
+            <b>Exhibit F.1.</b> There is no path from the copilot to
             <span class="inline-mono">case-management</span> that skips the queue — the MCP
             server's only side effect is an insert. <span class="inline-mono">admin-console</span>
             is drawn twice because it genuinely is called twice, by two different people, in two
@@ -992,6 +992,85 @@ footer.colophon{border-top:1px solid var(--line); padding:44px 0 70px;}
             structurally impossible rather than merely discouraged.
           </figcaption>
         </figure>
+      </div>
+
+      <div class="diagram-wrap" style="margin-top:44px;">
+        <h3 style="font-size:15px; letter-spacing:0.04em; text-transform:uppercase; font-family:var(--font-mono); color:var(--ink-soft);">F.2 — Every agent run, stage by stage</h3>
+        <p class="annotation">
+          Two agents ship today, built from the same shared enforcement layer
+          (<span class="inline-mono">agent-security</span>, ADR-0037). Each stage defends the next,
+          and every guarantee lives in code that runs after the model answers — none of them
+          depends on the model following its prompt.
+        </p>
+        <div class="table-scroll">
+          <table class="decision-table">
+            <thead>
+              <tr><th>Stage</th><th>Copilot (grounded Q&amp;A)</th><th>Export drafter (tool-calling)</th><th>Enforced by</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="decision">1 · authorize</td><td colspan="2">Deny-by-default: the caller's profile must be explicitly allowed to use the tool, or the run stops with a 403 — never silently degraded.</td><td class="source">authz · Pillar 1</td></tr>
+              <tr><td class="decision">2 · fetch / retrieve</td><td>Hybrid vector + keyword search over OpenSearch, tenant derived from the caller's bearer</td><td>Calls the regulator-export tool with the analyst's own token</td><td class="source">MCP · token propagation</td></tr>
+              <tr><td class="decision">3 · ground</td><td colspan="2">Retrieved text is fenced as <em>data, not instructions</em> (<span class="inline-mono">&lt;&lt;&lt;LABEL:nonce&gt;&gt;&gt;</span> markers) and scanned for prompt-injection patterns before it reaches the model.</td><td class="source">datamarking · injection</td></tr>
+              <tr><td class="decision">4 · generate</td><td colspan="2">Model-agnostic <span class="inline-mono">LlmPort</span> → LiteLLM → on-prem Ollama (qwen2.5:7b). Swapping to Bedrock or a hosted model is one adapter.</td><td class="source">agent-llm</td></tr>
+              <tr><td class="decision">5 · validate</td><td class="chosen">Cite-or-abstain (F.4) — fabricated or missing citations become an abstention</td><td class="chosen">Reject any number not present in the source package</td><td class="source">output validators · Pillar 2</td></tr>
+              <tr><td class="decision">6 · fall back</td><td>Abstain: "the knowledge base doesn't contain this" — a retrieval or model <em>failure</em> surfaces as an error, never as a fake abstention</td><td>Deterministic template on a rejected draft, model error or timeout — the export is never degraded by AI</td><td class="source">agent core</td></tr>
+              <tr><td class="decision">7 · gate</td><td colspan="2">Both agents are advisory (read-only tier). The only state-changing tool goes through the propose → approve queue in F.1.</td><td class="source">hitl · Pillar 3</td></tr>
+              <tr><td class="decision">8 · trace</td><td colspan="2">One record per run to three failure-isolated sinks: the body to object storage, an index row to Postgres, an event to Kafka that audit-service consumes. MCP calls are traced too, digested rather than dumped.</td><td class="source">trace · Pillar 4</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="diagram-wrap" style="margin-top:44px;">
+        <h3 style="font-size:15px; letter-spacing:0.04em; text-transform:uppercase; font-family:var(--font-mono); color:var(--ink-soft);">F.3 — Tool calling over MCP</h3>
+        <p class="annotation">
+          Agents reach platform capabilities as tools on three first-party MCP servers
+          (Streamable HTTP, internal network only; ADR-0039). MCP sits behind each agent's typed
+          tool port, so a direct-HTTP adapter and an MCP adapter can coexist per tool.
+        </p>
+        <div class="table-scroll">
+          <table class="decision-table">
+            <thead>
+              <tr><th>Server</th><th>Tools</th><th>Side effects</th><th>Used by</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="decision">mcp-regulator-export</td><td><span class="inline-mono">regulator_export</span></td><td>none — read-only proxy to the export package</td><td>export drafter</td></tr>
+              <tr><td class="decision">mcp-knowledge-retrieval</td><td><span class="inline-mono">knowledge_retrieve</span></td><td>none — tenant taken from the bearer server-side, <em>not</em> a tool parameter, so a crafted argument can't read another tenant</td><td>copilot</td></tr>
+              <tr><td class="decision">mcp-case-action</td><td><span class="inline-mono">assign_case</span>, <span class="inline-mono">list_pending_assignments</span>, <span class="inline-mono">approve_assignment</span>, <span class="inline-mono">reject_assignment</span></td><td class="chosen">one insert — <span class="inline-mono">assign_case</span> only <em>proposes</em>; approve runs the assignment under the approver's token, approver ≠ proposer, and stale proposals expire (default 48 h)</td><td>copilot (via the admin-console BFF)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="annotation">
+          <b>Two non-negotiables.</b> (1) <b>Token propagation</b> — every call carries the
+          requesting user's bearer, so a tool acts as that user and never as a privileged service
+          account (no confused deputy). (2) <b>A closed allow-list</b> — the client is constructed
+          with a fixed map of server names to URLs, and that map <em>is</em> the allow-list: an
+          off-list server raises <span class="inline-mono">McpServerNotAllowed</span> before any
+          network I/O, and there is no dynamic tool discovery to poison. A red-team harness
+          (<span class="inline-mono">agent-redteam</span>) mutates tool descriptions adversarially
+          and asserts each attack is caught by detection, containment, or the approval gate.
+        </p>
+      </div>
+
+      <div class="diagram-wrap" style="margin-top:44px;">
+        <h3 style="font-size:15px; letter-spacing:0.04em; text-transform:uppercase; font-family:var(--font-mono); color:var(--ink-soft);">F.4 — Cite-or-abstain is enforced in code, not the prompt</h3>
+        <p class="annotation">
+          A prompt can ask a model to cite its sources; it can't guarantee it will. So each
+          retrieved chunk carries a source id, the model is asked to cite ids as
+          <span class="inline-mono">[source-id]</span>, and a validator checks the answer against
+          the set of ids that were actually retrieved:
+        </p>
+<pre class="tree">cited = extract_citations(answer)            # every [source-id] token
+fabricated = cited - retrieved_ids           # cited, but never retrieved
+if fabricated:                       → reject  ("citation_not_retrieved")
+if not cited and not explicit_abstain:  → reject  (an unsupported claim)
+any rejection                        → the copilot returns an abstention,
+                                       with abstained=true and its citations</pre>
+        <p class="annotation">
+          This caught a real failure in testing: the 7B model invented plausible-looking source ids.
+          The same pattern generalizes the export drafter's rule — reject any number not in the
+          package — from "reject ungrounded figures" to "reject unsupported claims."
+        </p>
       </div>
     </section>
 
