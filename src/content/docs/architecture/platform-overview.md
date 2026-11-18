@@ -20,6 +20,9 @@ full lifecycle of the compliance cases that result.
 - Self-hosted on Proxmox today, with an AWS target (ECS Fargate + RDS +
   MSK/OpenSearch) designed so migration is a substrate swap, not a rewrite.
 
+For the full illustrated tour — thirteen exhibits from deployment topology to the
+AWS migration map — see the [architecture dossier](/agentic-compliance-platform/architecture-dossier/).
+
 ## How a screening flows
 
 A request enters through a channel, gets matched and scored, and fans out over

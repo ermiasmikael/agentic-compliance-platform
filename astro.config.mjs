@@ -55,7 +55,10 @@ export default defineConfig({
       sidebar: [
         {
           label: "Start here",
-          items: [{ label: "Welcome", link: "/" }],
+          items: [
+            { label: "Welcome", link: "/" },
+            { label: "Architecture dossier", link: "/architecture-dossier/", attrs: { target: "_blank" } },
+          ],
         },
         {
           label: "Architecture",
